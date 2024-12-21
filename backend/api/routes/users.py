@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordBearer
@@ -34,10 +34,13 @@ def get_user(db: db_dependency, user_id: int):
 
 @router.get("/users")
 def get_users(db: db_dependency):
+  """
+    Tüm kullanıcıları döndüren endpoint.
+  """
   return db.query(User).all()
 
 @router.get("/me", response_model=UserSchema)
-def get_current_user(current_user: UserSchema = Depends(get_current_user)):
+async def get_current_user(current_user: UserSchema = Depends(get_current_user)):
   """
   Geçerli kullanıcıyı döndürent endpoint.
   """

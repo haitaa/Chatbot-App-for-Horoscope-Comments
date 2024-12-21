@@ -6,28 +6,19 @@ export const api = axios.create({
   baseURL: API_BASE_URL
 })
 
-const getAuthToken = () => {
-  return localStorage.getItem("token");
-}
 
-export const fetchCurrentUser = async () => {
+export const fetchUsers = async () => {
   try {
-    const token = getAuthToken();
-    if (!token) {
-      return null;
-    }
-
-    console.log(token)
-
-    const response = await api.get(`/users/me`, {
+    const response = await api.get("/users/users", {
       headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json"
+      }
+    })
+    console.log(response.data)
     return response.data;
-  } catch (err) {
-    console.error("Failed to fetch current user: ", err);
-    return undefined;
+  } catch (error) {
+    console.error("Kullanıcıları alırken hata oluştu.", error)
+    throw error;
   }
 }

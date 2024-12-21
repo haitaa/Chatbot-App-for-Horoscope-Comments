@@ -1,7 +1,7 @@
 from datetime import timedelta, datetime, timezone
 from typing import Annotated, Optional, Union
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import jwt, JWTError
 from dotenv import load_dotenv
@@ -30,7 +30,7 @@ class UserCreateRequest(BaseModel):
 class UserPydantic(BaseModel):
   id: int
   username: str
-  email: Optional[str] = None
+  email: Optional[EmailStr] = None
   first_name: Optional[str] = None
   last_name: Optional[str] = None
   profile_picture: Optional[str] = None
@@ -88,7 +88,7 @@ def create_access_token(username: str, user_id: int, expires_delta: timedelta):
   encode.update({"exp": expires})
   return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(db_dependency)) -> User:
+def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(db_dependency)):
   """
     Kullanıcıyı JWT token'ı ile doğrular ve veritabanından kullanıcıyı döndürür.
     

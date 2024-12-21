@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import {
@@ -21,14 +21,17 @@ import {
   SquareTerminal,
 } from "lucide-react";
 
-import { fetchCurrentUser } from "@/lib/api";
+import AuthContext from "@/app/utils/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
+  const { user: currentUser } = useContext(AuthContext) || {};
+
   const sidebarData = {
     user: {
-      name: "user",
-      email: "",
-      avatar: "/avatars/shadcn.jpg",
+      name: currentUser?.username as string,
+      email: currentUser?.email as string,
+      avatar: currentUser?.profile as string,
     },
     navMain: [
       {
