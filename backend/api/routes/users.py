@@ -1,6 +1,6 @@
 from typing import Optional, List
 from pydantic import BaseModel
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
@@ -45,3 +45,10 @@ async def get_current_user(current_user: UserSchema = Depends(get_current_user))
   Geçerli kullanıcıyı döndürent endpoint.
   """
   return current_user
+
+@router.get("/{user_id}")
+def get_user_by_id(user_id: int, db: db_dependency):
+  user = db.query(User).filter(User.id == user_id).first()
+  if user is None:
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+  return user

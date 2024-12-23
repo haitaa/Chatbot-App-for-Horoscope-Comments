@@ -3,11 +3,7 @@
 import { useState, useEffect, useContext } from "react";
 
 import { AppSidebar } from "@/components/app-sidebar";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import {
   BookOpen,
   Bot,
@@ -153,52 +149,24 @@ export default function Page() {
 
   return (
     <SidebarProvider>
-      <AppSidebar data={sidebarData} />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2">
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
-          </div>
-        </header>
-      </SidebarInset>
+      <div className="flex w-full h-screen">
+        {/* Sidebar */}
+        <div className="">
+          <AppSidebar data={sidebarData} />
+        </div>
+
+        {/* Main Content */}
+        <div className="w-2/3">
+          {/* Orta kısım içeriğini buraya ekleyebilirsiniz */}
+          <h1 className="text-left">Timeline</h1>
+        </div>
+
+        {/* Menu Section */}
+        <div className="w-1/3 p-4">
+          <h2 className="text-xl font-semibold">Menu Section</h2>
+          {/* Menü içeriğinizi buraya ekleyebilirsiniz */}
+        </div>
+      </div>
     </SidebarProvider>
   );
 }
-
-// "use client";
-
-// import { useContext } from "react";
-
-// import { Button } from "@/components/ui/button";
-// import AuthContext from "../../../utils/AuthContext";
-
-// // Ana Sayfa
-
-// const Home = () => {
-//   const authContext = useContext(AuthContext);
-
-//   if (!authContext) {
-//     return <div>Loading...</div>;
-//   }
-
-//   const { user } = authContext;
-
-//   if (!user) {
-//     return <p>Loading...</p>;
-//   }
-
-//   const handleLogout = () => {
-//     authContext?.logout(); // AuthContext'teki logout fonksiyonunu çağır
-//   };
-
-//   return (
-//     <div>
-//       <h1>HomePage {user.username}</h1>
-//       <Button size="lg" onClick={handleLogout}>
-//         Log out
-//       </Button>
-//     </div>
-//   );
-// };
-
-// export default Home;

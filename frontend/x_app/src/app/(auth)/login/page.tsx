@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useContext, FormEvent } from "react";
-import AuthContext from "../utils/AuthContext";
+import AuthContext from "../../utils/AuthContext";
 
 import Head from "next/head";
 import Link from "next/link";
