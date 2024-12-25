@@ -10,6 +10,7 @@ import Image from "next/image";
 import FollowerCount from "@/components/follower-count";
 import EditProfileButton from "./edit-profile-button";
 import FollowingCount from "@/components/following-count";
+import FollowUnfollowButton from "./follow-unfollow-button";
 
 interface User {
   id: string;
@@ -102,11 +103,17 @@ function UserProfile({ user, loggedInUserId }: UserProfileProps) {
       </div>
 
       {/* Edit Profile Butonu */}
-      {Number(user.id) === loggedInUserId && (
-        <div className="absolute mt-5 right-5">
+      <div className="absolute mt-5 right-5">
+        {/* Edit Profile Butonu */}
+        {Number(user.id) === loggedInUserId ? (
           <EditProfileButton user={user} />
-        </div>
-      )}
+        ) : (
+          <FollowUnfollowButton
+            userId={Number(user.id)}
+            currentUserId={Number(loggedInUserId)}
+          />
+        )}
+      </div>
 
       {/* Kullanıcı Bilgileri */}
       <div className="mt-12 px-5 pb-5 space-y-3">

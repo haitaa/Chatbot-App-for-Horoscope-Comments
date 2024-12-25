@@ -117,9 +117,12 @@ def get_followers(user_id: int, db: db_dependency):
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
   return user.followers
 
+class FollowRequest(BaseModel):
+   current_user_id: int
+   user_id: int
 
 @router.post("/{user_id}/follow", status_code=status.HTTP_200_OK)
-def follow_user(user_id: int, current_user_id: int, db: db_dependency):
+def follow_user(user_id: int, follow_request: FollowRequest, db: db_dependency):
     """
     Belirtilen kullanıcıyı takip etme işlemini gerçekleştiren endpoint.
 
@@ -140,8 +143,8 @@ def follow_user(user_id: int, current_user_id: int, db: db_dependency):
     - Takip başarılı olduğunda 200 OK ve bilgilendirici bir mesaj döndürülür.
     - Hatalı durumlarda uygun HTTP hatası ve açıklama döndürülür.
     """
-    user_to_follow = db.query(User).filter(User.id == user_id).first()
-    current_user = db.query(User).filter(User.id == current_user_id).first()
+    user_to_follow = db.query(User).filter(User.id == follow_request.user_id).first()
+    current_user = db.query(User).filter(User.id == follow_request.current_user_id).first()
 
     if not user_to_follow:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
@@ -155,3 +158,58 @@ def follow_user(user_id: int, current_user_id: int, db: db_dependency):
     current_user.following.append(user_to_follow)
     db.commit()
     return { "message": f"You are now following {user_to_follow}" }
+
+@router.delete("/{user_id}/unfollow", status_code=status.HTTP_200_OK)
+def unfollow_user(user_id: int, current_user_id: int, db: db_dependency):
+   """
+   Belirtilen kullanıcıyı takipten çıkaran endpoint.
+
+    Parametreler:
+    - `user_id` (int): Takipten çıkarılacak kullanıcının benzersiz kimliği.
+    - `current_user` (UserSchema): Oturum açmış olan kullanıcı.
+    - `db` (Session): Veritabanı bağlantısı.
+
+    Dönüş:
+    - Takipten çıkarma başarılıysa 200 OK.
+    - Eğer kullanıcı bulunamazsa, 404 Hata döndürülür.
+    - Eğer kullanıcı takip edilmiyorsa, 400 Hata döndürülür.
+   """
+
+   current_user = db.query(User).filter(User.id == current_user_id).first()
+   user_to_unfollow = db.query(User).filter(User.id == user_id).first()
+
+   if not user_to_unfollow or not current_user:
+      raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+   
+   if user_to_unfollow not in current_user.following:
+      raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User is not following")
+   
+   current_user.following.remove(user_to_unfollow)
+   db.commit()
+   return {"message": f"You are no longer following {user_to_unfollow}"}
+
+class FollowerCheckResponse(BaseModel):
+   is_following: bool
+
+@router.get("/{user_id}/is-following", response_model=FollowerCheckResponse)
+def check_if_user_is_following(user_id: int, current_user_id: int, db: db_dependency):
+   """
+   Belirtilen kullanıcının takipçi listesinde olup olmadığını kontrol eder.
+    
+    Parametreler:
+    - `user_id` (int): Takip edilmek istenen kullanıcının benzersiz kimliği.
+    - `current_user_id` (int): Oturum açmış olan kullanıcının benzersiz kimliği.
+    - `db` (Session): Veritabanı bağlantısı.
+    
+    Dönüş:
+    - Kullanıcının takip edip etmediğine dair bir boolean değer döndürülür.
+   """
+   user = db.query(User).filter(User.id == user_id).first()
+   current_user = db.query(User).filter(User.id == current_user_id).first()
+
+   if not user or not current_user:
+       raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+   
+   is_following = any(follower.id == user_id for follower in current_user.following)
+
+   return FollowerCheckResponse(is_following=is_following)
