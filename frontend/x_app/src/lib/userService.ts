@@ -220,6 +220,18 @@ interface UpdateUserData {
 }
 
 
+/**
+ * Updates the user's profile information by sending a PATCH request to the server.
+ * 
+ * @param userId - The unique ID of the user whose profile is being updated.
+ * @param updateData - The data object containing the updated user information.
+ * @returns A promise that resolves with the response data from the server if the update is successful.
+ * 
+ * This function makes an API call to the `/users/{userId}` endpoint, passing the `userId` and `updateData` 
+ * as parameters. It includes the authorization token from localStorage in the request headers.
+ * 
+ * @throws {Error} Throws an error if the API request fails or encounters an issue.
+ */
 export const updateUser = async (userId: number, updateData: UpdateUserData): Promise<any> => {
   try {
     const response = await api.patch(`/users/${userId}`, updateData, {
