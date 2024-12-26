@@ -90,6 +90,23 @@ export async function followUser(user_id: number, currentUserId: number) {
   }
 }
 
+/**
+ * Bir kullanıcıyı takipten çıkarmak için backend API'ye DELETE isteği gönderir.
+ *
+ * Bu fonksiyon, belirtilen kullanıcıyı (`userId`) oturum açmış olan kullanıcının 
+ * (`currentUserId`) takip ettiği kişiler listesinden çıkarmak için bir istek gönderir.
+ * İşlem başarılı olursa bir başarı mesajı döndürülür. Bir hata oluşursa, hata detayları
+ * yakalanır ve döndürülür.
+ *
+ * @param {number} userId - Takipten çıkarılacak kullanıcının benzersiz kimliği.
+ * @param {number} currentUserId - Takipten çıkarma işlemini yapan oturum açmış kullanıcının benzersiz kimliği.
+ * @returns {Promise<string>} - Bir başarı veya hata mesajı döndüren bir promise.
+ *
+ * Hatalar:
+ * - Eğer takipten çıkarılacak kullanıcı bulunamazsa, bir hata mesajı döndürülür.
+ * - Eğer kullanıcı zaten takip edilmiyorsa, bir hata mesajı döndürülür.
+ * - Beklenmeyen diğer hatalar loglanır ve döndürülür.
+ */
 export const unfollowUser = async (userId: number, currentUserId: number) => {
   try {
     const response = await api.delete(`/users/${userId}/unfollow`, {
@@ -190,5 +207,35 @@ export const checkIfUserIsFollowing = async (userId: number, currentUserId: numb
   } catch(error) {
     console.error("Error checking if user is following: ", error)
     throw false;
+  }
+}
+
+interface UpdateUserData {
+  username?: string;
+  email?: string;
+  first_name?: string;
+  last_name?: string;
+  bio?: string;
+  profile?: string;
+}
+
+
+export const updateUser = async (userId: number, updateData: UpdateUserData): Promise<any> => {
+  try {
+    const response = await api.patch(`/users/${userId}`, updateData, {
+      params: {
+        user_id: userId,
+        user_update: updateData,
+      },
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        "Content-Type": "application/json"
+      }
+    })
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user: ", error)
+    throw error;
   }
 }

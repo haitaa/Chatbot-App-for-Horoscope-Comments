@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
+from datetime import datetime
 
 from models.user import User
 from dependencies.dependency import db_dependency
@@ -21,6 +22,7 @@ class UserSchema(BaseModel):
   last_name: Optional[str] = None
   profile: Optional[str] = None
   bio: Optional[str] = None
+  created_at: Optional[datetime] = None
 
 
   class Config:
@@ -213,3 +215,48 @@ def check_if_user_is_following(user_id: int, current_user_id: int, db: db_depend
    is_following = any(follower.id == user_id for follower in current_user.following)
 
    return FollowerCheckResponse(is_following=is_following)
+
+class UpdateUserRequest(BaseModel):
+    username: Optional[str] = None
+    email: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    profile: Optional[str] = None
+    bio: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+@router.patch("/{user_id}", status_code=status.HTTP_200_OK)
+def update_user(
+   user_id: int,
+   user_update: UpdateUserRequest,
+   db: db_dependency,
+):
+    """
+    Kullanıcı bilgilerini güncellemek için bir endpoint.
+
+    Parametreler:
+    - `user_id` (int): Güncellenmesi istenen kullanıcının kimliği.
+    - `user_update` (UpdateUserRequest): Güncelleme yapılacak alanlar.
+    - `db` (Session): Veritabanı bağlantısı.
+    - `current_user` (UserSchema): Şu anda oturum açmış kullanıcı.
+
+    Dönüş:
+    - Güncellenmiş kullanıcı bilgileri.
+    - Eğer kullanıcı bulunamazsa, 404 Hata döndürülür.
+    - Eğer kullanıcı güncelleme yetkisine sahip değilse, 403 Hata döndürülür.
+    """
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+
+    updated_data = user_update.model_dump(exclude_unset=True)
+    for key, value in updated_data.items():
+       setattr(user, key, value)
+
+    db.commit()
+    db.refresh(user)
+    return user

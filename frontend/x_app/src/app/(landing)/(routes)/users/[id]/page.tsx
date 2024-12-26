@@ -11,6 +11,7 @@ import FollowerCount from "@/components/follower-count";
 import EditProfileButton from "./edit-profile-button";
 import FollowingCount from "@/components/following-count";
 import FollowUnfollowButton from "./follow-unfollow-button";
+import { formatDate } from "@/lib/utils";
 
 interface User {
   id: string;
@@ -20,6 +21,7 @@ interface User {
   last_name: string | null;
   bio: string | null;
   profile: string | null;
+  created_at: string;
 }
 
 interface UserPageProps {
@@ -81,6 +83,7 @@ interface UserProfileProps {
 }
 
 function UserProfile({ user, loggedInUserId }: UserProfileProps) {
+  const formattedDate = formatDate(user.created_at as string);
   return (
     <div className="h-fit w-full rounded-2xl bg-card shadow-sm pt-5 relative">
       {/* Banner */}
@@ -123,7 +126,7 @@ function UserProfile({ user, loggedInUserId }: UserProfileProps) {
           </h1>
           <div className="text-muted-foreground">@{user.username}</div>
         </div>
-        <div>Member since 12/08/2024</div>
+        <div>Member since {formattedDate}</div>
         <div className="flex items-center gap-3">
           <FollowerCount userId={Number(user.id)} />
           <FollowingCount userId={Number(user.id)} />
