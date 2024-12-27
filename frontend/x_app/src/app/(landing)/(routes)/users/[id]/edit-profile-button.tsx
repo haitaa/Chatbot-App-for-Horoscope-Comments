@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
-import { updateUser } from "@/lib/userService";
+import { updateUser, uploadProfileImage } from "@/lib/userService";
 
 interface User {
   id: string;
@@ -46,6 +46,9 @@ export default function EditProfileButton({
     last_name: user.last_name || "",
     bio: user.bio || "",
   });
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -54,10 +57,28 @@ export default function EditProfileButton({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files ? e.target.files[0] : null;
+    if (file) {
+      setProfileImage(file);
+      const objectUrl = URL.createObjectURL(file);
+      setImagePreview(objectUrl);
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       const token = localStorage.getItem("token");
-      const updatedUser = await updateUser(Number(user.id), formData);
+      let updatedUser = { ...formData };
+
+      if (profileImage) {
+        setIsUploading(true);
+        console.log(profileImage);
+        await uploadProfileImage(Number(user.id), profileImage);
+        setIsUploading(false);
+      }
+
+      updatedUser = await updateUser(Number(user.id), formData);
       toast.success("Profile updated successfully!");
       setIsOpen(false);
     } catch (e) {
@@ -132,11 +153,36 @@ export default function EditProfileButton({
               </Label>
               <Textarea
                 id="bio"
+                name="bio"
                 value={formData.bio}
                 onChange={handleChange}
                 rows={4}
                 className="col-span-3 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
+            </div>
+            {/* Profile Image Upload */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="profile_image" className="text-right">
+                Profile Image
+              </Label>
+              <div className="col-span-3">
+                <input
+                  type="file"
+                  accept="image/*"
+                  id="profile_image"
+                  onChange={handleFileChange}
+                  className="mb-3"
+                />
+                {imagePreview && (
+                  <div className="mb-4">
+                    <img
+                      src={imagePreview}
+                      alt="Profile Preview"
+                      className="w-32 h-32 object-cover rounded-full"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <DialogFooter>

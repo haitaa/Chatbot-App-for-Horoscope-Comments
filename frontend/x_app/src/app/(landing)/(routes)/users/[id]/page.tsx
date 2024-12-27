@@ -122,10 +122,17 @@ function UserProfile({ user, loggedInUserId }: UserProfileProps) {
       <div className="mt-12 px-5 pb-5 space-y-3">
         <div>
           <h1 className="text-3xl font-bold">
-            <p>Mustafa Haita</p>
+            <p>
+              {user.first_name} {user.last_name}
+            </p>
           </h1>
           <div className="text-muted-foreground">@{user.username}</div>
         </div>
+        {user.bio && (
+          <div className="mt-3 text-gray-600">
+            <p>{user.bio}</p>
+          </div>
+        )}
         <div>Member since {formattedDate}</div>
         <div className="flex items-center gap-3">
           <FollowerCount userId={Number(user.id)} />

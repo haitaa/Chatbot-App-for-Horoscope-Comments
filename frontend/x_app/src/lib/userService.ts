@@ -251,3 +251,27 @@ export const updateUser = async (userId: number, updateData: UpdateUserData): Pr
     throw error;
   }
 }
+
+export const uploadProfileImage = async (userId: number, file: File) => {
+  try {
+
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const token = localStorage.getItem("token");
+    
+    const response = await api.patch(`/users/${userId}/profile-image`, formData, {
+      params: {
+        user_id: userId
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data"
+      }
+    }) 
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading profile image: ", error)
+    throw error;
+  }
+}

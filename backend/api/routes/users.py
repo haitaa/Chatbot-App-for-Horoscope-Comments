@@ -1,9 +1,14 @@
 from typing import Optional, List
+import cloudinary.uploader
 from pydantic import BaseModel
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, File, UploadFile
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from datetime import datetime
+import os
+import shutil
+import cloudinary
+from cloudinary.uploader import upload
 
 from models.user import User
 from dependencies.dependency import db_dependency
@@ -13,6 +18,13 @@ router = APIRouter(
   prefix="/users",
   tags=["users"]
 )
+
+cloudinary.config(
+   cloud_name="duqe0jhw4",
+   api_key="433653347375362",
+   api_secret="tJpqKJdHdKdV-qrPrbE-MOHi_WM"
+)
+
 
 class UserSchema(BaseModel):
   id: int
@@ -260,3 +272,40 @@ def update_user(
     db.commit()
     db.refresh(user)
     return user
+
+# İzin verilen MIME türleri ve maksimum dosya boyutu (örnek: 5 MB)
+ALLOWED_CONTENT_TYPES = ["image/jpeg", "image/png", "image/gif"]
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
+
+
+@router.patch("/{user_id}/profile-image", status_code=status.HTTP_200_OK)
+async def upload_profile_image(user_id: int, file: UploadFile, db: db_dependency):
+   """
+    Kullanıcının profil resmini güncelleyen endpoint.
+
+    Parametreler:
+    - `user_id` (int): Kullanıcının benzersiz kimliği.
+    - `file` (UploadFile): Yüklenen profil resmi dosyası.
+    - `db` (Session): Veritabanı bağlantısı.
+
+    Dönüş:
+    - Profil resmi başarıyla yüklendiğinde 200 OK ve yeni profil resmi URL'si döner.
+    - Kullanıcı bulunamazsa 404 Hata döner.
+    """
+   print("File:", file.filename)
+   user = db.query(User).filter(User.id == user_id).first()
+   if not user:
+      raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+   
+   try:
+      upload_result = cloudinary.uploader.upload(file.file)
+      profile_image_url = upload_result["secure_url"]
+   except Exception as e:
+      raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+   
+   user.profile = profile_image_url
+   db.commit()
+   db.refresh(user)
+
+   return { "message": "Profile image uploaded successfully", "profile": profile_image_url}
+  
