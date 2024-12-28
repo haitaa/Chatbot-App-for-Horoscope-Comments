@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes import users, auth, messages
+from routes import users, auth, messages, tweet
 from config.database import Base, engine
 
 app = FastAPI()
@@ -19,3 +19,4 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(messages.router)
+app.include_router(tweet.router)

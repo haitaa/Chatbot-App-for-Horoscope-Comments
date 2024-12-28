@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
+
 from config.database import Base
 from .mixins import TimestampMixin
 
@@ -36,3 +37,15 @@ class User(Base, TimestampMixin):
         secondaryjoin=id == follows.c.follower_id,
         back_populates="following"
     )
+
+    tweets = relationship("Tweet", back_populates="user", cascade="all, delete-orphan")
+    liked_tweets = relationship("Like", back_populates="user")
+    reposted_tweets = relationship("Repost", back_populates="user")
+    comments = relationship("Comment", back_populates="user")
+    bookmarked_tweets = relationship("Bookmark", back_populates="user")
+
+from .tweet import Tweet
+from .like import Like
+from .repost import Repost
+from .comment import Comment
+from .bookmark import Bookmark

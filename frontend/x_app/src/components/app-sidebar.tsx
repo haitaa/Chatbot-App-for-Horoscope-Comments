@@ -28,7 +28,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useContext } from "react";
-import AuthContext from "@/app/utils/AuthContext";
+import { AuthContext } from "@/app/utils/AuthContext";
 
 export function AppSidebar() {
   const { user: currentUser } = useContext(AuthContext) || {};
