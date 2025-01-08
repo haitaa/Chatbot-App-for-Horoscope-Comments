@@ -1,6 +1,7 @@
 "use client";
 
 import { AppSidebar } from "@/components/app-sidebar";
+import Chatbot from "@/components/chatbot";
 
 export default function Page() {
   return (
@@ -13,7 +14,8 @@ export default function Page() {
       {/* Main Content */}
       <div className="w-2/3">
         {/* Orta kısım içeriğini buraya ekleyebilirsiniz */}
-        <h1 className="text-left">Timeline</h1>
+
+        <Chatbot />
       </div>
 
       {/* Menu Section */}

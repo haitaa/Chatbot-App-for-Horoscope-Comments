@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes import users, auth, messages, tweet
+from routes import users, auth, messages, tweet, chat_messages
 from config.database import Base, engine
 
 app = FastAPI()
@@ -20,3 +20,4 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(messages.router)
 app.include_router(tweet.router)
+app.include_router(chat_messages.router)

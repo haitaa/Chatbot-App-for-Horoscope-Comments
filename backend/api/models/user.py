@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
-
 from config.database import Base
 from .mixins import TimestampMixin
 
+# Takip ilişkisi için yardımcı tablo
 follows = Table(
     "follows",
     Base.metadata,
@@ -22,6 +22,7 @@ class User(Base, TimestampMixin):
     profile = Column(String, nullable=True)
     bio = Column(String, nullable=True)
 
+    # Takip ilişkileri
     following = relationship(
         "User",
         secondary=follows,
@@ -29,7 +30,6 @@ class User(Base, TimestampMixin):
         secondaryjoin=id == follows.c.following_id,
         back_populates="followers"
     )
-
     followers = relationship(
         "User",
         secondary=follows,
@@ -38,14 +38,19 @@ class User(Base, TimestampMixin):
         back_populates="following"
     )
 
+    # Diğer ilişkiler
     tweets = relationship("Tweet", back_populates="user", cascade="all, delete-orphan")
     liked_tweets = relationship("Like", back_populates="user")
     reposted_tweets = relationship("Repost", back_populates="user")
     comments = relationship("Comment", back_populates="user")
     bookmarked_tweets = relationship("Bookmark", back_populates="user")
+    
+    # Chat Messages ilişkisi
+    chat_messages = relationship("ChatMessage", back_populates="user", cascade="all, delete-orphan")
 
 from .tweet import Tweet
 from .like import Like
 from .repost import Repost
 from .comment import Comment
 from .bookmark import Bookmark
+from .chat_message import ChatMessage
