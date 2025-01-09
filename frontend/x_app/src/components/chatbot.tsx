@@ -3,6 +3,7 @@ import { AiOutlineSend } from "react-icons/ai";
 import { getChatMessages, sendChatMessage } from "@/lib/chatMessageService";
 import Image from "next/image";
 import { AuthContext } from "@/app/utils/AuthContext";
+import { formatTime } from "@/lib/utils";
 
 interface Message {
   sender: "user" | "bot";
@@ -81,6 +82,9 @@ const Chatbot: React.FC = () => {
                 }`}
               >
                 {message.text}
+                <div className="bottom-1 right-2 text-xs text-gray-400">
+                  {formatTime(message.created_at)}
+                </div>
               </div>
               {message.sender === "user" && currentUser && (
                 <Image
