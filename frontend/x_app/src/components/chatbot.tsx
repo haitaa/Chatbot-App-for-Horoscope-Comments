@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
 import { AiOutlineSend } from "react-icons/ai";
+import { getChatMessages, sendChatMessage } from "@/lib/chatMessageService";
+import Image from "next/image";
+import { AuthContext } from "@/app/utils/AuthContext";
 
 interface Message {
   sender: "user" | "bot";
@@ -7,21 +10,39 @@ interface Message {
 }
 
 const Chatbot: React.FC = () => {
+  const { user: currentUser } = useContext(AuthContext) || {};
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
 
-  const handleSendMessage = () => {
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const chatMessages = await getChatMessages();
+        setMessages(chatMessages);
+      } catch (error) {
+        console.error("Error fetching chat messages:", error);
+      }
+    };
+    fetchMessages();
+  }, []);
+
+  const handleSendMessage = async () => {
     if (input.trim() === "") return;
 
     const userMessage: Message = { sender: "user", text: input };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
 
-    // Simulate bot response
-    const botMessage: Message = {
-      sender: "bot",
-      text: "Bu bir bot mesajı! ChatGPT'ye hoş geldiniz.",
-    };
-    setMessages((prevMessages) => [...prevMessages, userMessage, botMessage]);
+    try {
+      const botResponse = await sendChatMessage(input);
+      const botMessage: Message = { sender: "bot", text: botResponse.text };
+      setMessages((prevMessages) => [...prevMessages, botMessage]);
+    } catch (error) {
+      const errorMessage: Message = {
+        sender: "bot",
+        text: "Bot yanıtı alınamadı.",
+      };
+      setMessages((prevMessages) => [...prevMessages, errorMessage]);
+    }
 
     setInput("");
   };
@@ -41,8 +62,17 @@ const Chatbot: React.FC = () => {
               key={index}
               className={`flex ${
                 message.sender === "user" ? "justify-end" : "justify-start"
-              }`}
+              } items-center`}
             >
+              {message.sender === "bot" && (
+                <Image
+                  src="/bot-avatar.jpg"
+                  alt="Bot Avatar"
+                  width={40}
+                  height={40}
+                  className="rounded-full mr-3"
+                />
+              )}
               <div
                 className={`max-w-sm px-4 py-2 rounded-2xl text-sm shadow-md ${
                   message.sender === "user"
@@ -52,6 +82,15 @@ const Chatbot: React.FC = () => {
               >
                 {message.text}
               </div>
+              {message.sender === "user" && currentUser && (
+                <Image
+                  src={currentUser.profile_picture || "/avatar-placeholder.png"}
+                  alt="User Avatar"
+                  width={40}
+                  height={40}
+                  className="rounded-full ml-3"
+                />
+              )}
             </div>
           ))}
         </div>

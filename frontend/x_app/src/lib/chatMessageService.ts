@@ -14,3 +14,17 @@ export const getChatMessages = async () => {
         throw err;
     }
 }
+
+export const sendChatMessage = async (message: string) => {
+    try {
+        const response = await api.post("chat_messages", { text: message, sender: "user"}, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Mesaj gönderirken hata oluştu:", error);
+        throw error;
+    }
+}
