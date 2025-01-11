@@ -66,15 +66,23 @@ export function AppSidebar() {
         icon: Bot,
         items: [
           {
-            title: "Genesis",
+            title: "Bert",
             url: "#",
           },
           {
-            title: "Explorer",
+            title: "Distilbert",
             url: "#",
           },
           {
-            title: "Quantum",
+            title: "Alberta",
+            url: "#",
+          },
+          {
+            title: "Roberta",
+            url: "#",
+          },
+          {
+            title: "XLNet",
             url: "#",
           },
         ],

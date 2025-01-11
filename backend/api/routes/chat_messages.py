@@ -1,21 +1,51 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from pydantic import BaseModel
-from dependencies.dependency import db_dependency, get_current_user
+from pydantic import BaseModel, field_validator
+import torch
+from datetime import datetime
+
 from models.chat_message import ChatMessage
 from models.user import User
-from datetime import datetime
+from dependencies.dependency import db_dependency, get_current_user
 
 router = APIRouter(
     prefix="/chat_messages",
     tags=["chat_messages"]
 )
 
+MODEL_PATH = "./models/your_trained_model.pt"
+model = torch.load(MODEL_PATH)
+model.eval()
+
+def preprocess_input(text: str):
+    """
+    Kullanıcıdan gelen metni model uygun hale getirir.
+    """
+    tokens = text.lower().split()
+    return torch.tensor([len(tokens)])
+
+def postprocess_output(output):
+    return "Positive" if output.argmax().item() == 1 else "Negative"
+
+
+
 
 class MessageCreate(BaseModel):
     sender: str # "user" | "bot"
     text: str
+
+    @field_validator("sender")
+    def validate_sender(cls, sender):
+        if sender not in ["user", "bot"]:
+            raise ValueError("Sender must be 'user' or 'bot'")
+        return sender
+    
+    @field_validator("text")
+    def validate_text(cls, text):
+        if not text.strip():
+            raise ValueError("Message text cannot be empty")
+        return text.strip()
 
 class MessageOut(BaseModel):
     id: int
