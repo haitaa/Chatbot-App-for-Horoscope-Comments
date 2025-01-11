@@ -14,9 +14,9 @@ router = APIRouter(
     tags=["chat_messages"]
 )
 
-MODEL_PATH = "./models/your_trained_model.pt"
-model = torch.load(MODEL_PATH)
-model.eval()
+# MODEL_PATH = "./models/your_trained_model.pt"
+# model = torch.load(MODEL_PATH)
+# model.eval()
 
 def preprocess_input(text: str):
     """
@@ -104,12 +104,20 @@ def reply_message(
     Hata Durumları:
     - Eğer model tahmini sırasında bir hata oluşursa, HTTP 500 döner ve hata mesajı içerir.
     """
-    user_message = create_message(message=message, db=db, current_user=current_user)
+    user_messages = ChatMessage(
+        sender="user",
+        text=message.text,
+        user_id=current_user["id"]
+    )
+    db.add(user_messages)
+    db.commit()
+    db.refresh(user_messages)
     
     try:
-        input_tensor = preprocess_input(message.text)
-        model_output = model(input_tensor)
-        bot_response_text = postprocess_output(model_output)
+        pass
+        #input_tensor = preprocess_input(message.text)
+        #model_output = model(input_tensor)
+        #bot_response_text = postprocess_output(model_output)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -118,7 +126,7 @@ def reply_message(
     
     bot_message = ChatMessage(
         sender="bot",
-        text=bot_response_text,
+        #text=bot_response_text,
         user_id=current_user["id"]
     )
     db.add(bot_message)

@@ -67,11 +67,11 @@ export function AppSidebar() {
         items: [
           {
             title: "Bert",
-            url: "#",
+            url: "/models/bert",
           },
           {
             title: "Distilbert",
-            url: "#",
+            url: "/models/distilbert",
           },
           {
             title: "Alberta",
