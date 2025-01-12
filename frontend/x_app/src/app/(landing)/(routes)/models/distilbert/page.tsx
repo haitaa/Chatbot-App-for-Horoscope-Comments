@@ -52,7 +52,7 @@ from transformers import DistilBertModel, DistilBertTokenizer
 tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
 model = DistilBertModel.from_pretrained('distilbert-base-uncased')
 
-inputs = tokenizer("Hello, my dog is cute", return_tensors="pt")
+inputs = tokenizer("Hello, how about today", return_tensors="pt")
 outputs = model(**inputs)
 
 print(outputs.last_hidden_state)`}
